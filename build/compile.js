@@ -34,7 +34,8 @@
         if (match) {
           comment = match[0], quote = match[1], file = match[2];
           _results.push(snockets.getConcatenation("" + assets + "/" + file, {
-            minify: minify
+            minify: minify,
+            async: false
           }, function(err, js) {
             var filename;
             if (err) {

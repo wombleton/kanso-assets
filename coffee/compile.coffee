@@ -26,7 +26,7 @@ module.exports = (root, path, settings, doc, callback) ->
       match = re.exec(html)
       if match
         [comment, quote, file] = match
-        snockets.getConcatenation("#{assets}/#{file}", minify: minify, (err, js) ->
+        snockets.getConcatenation("#{assets}/#{file}", minify: minify, async: false, (err, js) ->
           if err
             throw err
           else
