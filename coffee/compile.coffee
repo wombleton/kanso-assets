@@ -1,8 +1,9 @@
 _ = require('underscore')
-snockets = new (require('snockets'))()
+Snockets = require('snockets')
 crypto = require('crypto')
 
 module.exports = (root, path, settings, doc, callback) ->
+  snockets = new Snockets()
   config = _.defaults(settings['kanso-assets'] or {},
     assets: 'assets'
     minify: false
@@ -20,21 +21,27 @@ module.exports = (root, path, settings, doc, callback) ->
     attachment = attachments[name]
     html = new Buffer(attachment.data, 'base64').toString()
     re = /<!--\s*js\((['"])(.+?)\1\)\s*-->/g
-    while match = re.exec(html)
-      [comment, quote, file] = match
-      snockets.getConcatenation("#{assets}/#{file}", minify: minify, (err, js) ->
-        if err
-          throw err
-        else
-          filename = "#{file.replace(/\.(coffee|js)/, '')}-#{crypto.createHash('md5').update(js).digest('hex').substring(0, 12)}.js"
-          attachments["#{output}/#{filename}"] =
-            content_type: 'text/javascript'
-            data: new Buffer(js).toString('base64')
-          html = html.replace(/<!--\s*js\((['"])(.+?)\1\)\s*-->/, """<script src="#{prefix}/#{filename}"></script>""")
-          attachments[name] =
-            content_type: 'text/html'
-            data: new Buffer(html).toString('base64')
-      )
-
-    callback(null, doc) if index is names.length - 1
+    finished = false
+    while not finished
+      match = re.exec(html)
+      if match
+        [comment, quote, file] = match
+        snockets.getConcatenation("#{assets}/#{file}", minify: minify, (err, js) ->
+          if err
+            throw err
+          else
+            filename = "#{file.replace(/\.(coffee|js)/, '')}-#{crypto.createHash('md5').update(js).digest('hex').substring(0, 12)}.js"
+            attachments["#{output}/#{filename}"] =
+              content_type: 'text/javascript'
+              data: new Buffer(js).toString('base64')
+            html = html.replace(/<!--\s*js\((['"])(.+?)\1\)\s*-->/, """<script src="#{prefix}/#{filename}"></script>""")
+            attachments[name] = {
+              content_type: 'text/html'
+              data: new Buffer(html).toString('base64')
+            }
+            console.log("Added #{output}/#{filename} with a path of #{prefix}/#{filename}")
+        )
+      else
+        callback(null, doc) if index is names.length - 1
+        finished = true
   )
