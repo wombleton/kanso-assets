@@ -9,8 +9,7 @@
   crypto = require('crypto');
 
   module.exports = function(root, path, settings, doc, callback) {
-    var assets, attachments, config, minify, names, output, prefix, snockets;
-    snockets = new Snockets();
+    var assets, attachments, config, minify, names, output, prefix;
     config = _.defaults(settings['kanso-assets'] || {}, {
       assets: 'assets',
       minify: false,
@@ -23,7 +22,8 @@
       return /\.html$/.test(name);
     });
     return _.each(names, function(name, index) {
-      var attachment, comment, file, finished, html, match, quote, re, _results;
+      var attachment, comment, file, finished, html, match, quote, re, snockets, _results;
+      snockets = new Snockets();
       attachment = attachments[name];
       html = new Buffer(attachment.data, 'base64').toString();
       re = /<!--\s*js\((['"])(.+?)\1\)\s*-->/g;

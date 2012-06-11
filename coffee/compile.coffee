@@ -3,7 +3,6 @@ Snockets = require('snockets')
 crypto = require('crypto')
 
 module.exports = (root, path, settings, doc, callback) ->
-  snockets = new Snockets()
   config = _.defaults(settings['kanso-assets'] or {},
     assets: 'assets'
     minify: false
@@ -18,6 +17,7 @@ module.exports = (root, path, settings, doc, callback) ->
     /\.html$/.test(name)
   )
   _.each(names, (name, index) ->
+    snockets = new Snockets()
     attachment = attachments[name]
     html = new Buffer(attachment.data, 'base64').toString()
     re = /<!--\s*js\((['"])(.+?)\1\)\s*-->/g
